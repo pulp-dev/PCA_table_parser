@@ -1,7 +1,5 @@
-import requests
 from selenium import webdriver
 
-from lxml.html import fromstring
 import xml.etree.ElementTree as ET
 
 import time
@@ -128,11 +126,14 @@ class Scraper:
     def next_page(self):
         buttons = self.main_driver.find_elements_by_xpath("//a[@class='ui-commandlink ui-widget']")
         for el in buttons:
-            if el.text == str(self.current_page):
+            if el.text == str(self.current_page + 1):
+                self.current_page += 1
                 print(f'page: {self.current_page}')
+                time.sleep(3)
                 el.click()
+                self.secondary_driver.quit()
+                self.secondary_driver = webdriver.Firefox(executable_path=self.driver_path, options=self.options)
                 return
-        print()
         raise Exception
 
     def get_info_from_elements_page(self, elements_url, info):
@@ -193,12 +194,10 @@ class Scraper:
             self.main_driver.get(self.url)
             self.extract_info()
             self.save()
-            self.current_page += 1
             try:
                 self.next_page()
             except Exception as e:
                 print(e)
-                print()
                 break
 
 
